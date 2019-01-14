@@ -12,7 +12,7 @@ from io import BytesIO
 from urllib3.packages.six.moves.http_client import HTTPConnection
 import requests
 
-version = "0.1"
+version = "0.2"
 
 
 def insert_middlewares(pre_funcs=None, post_funcs=None):
@@ -69,11 +69,14 @@ class Capturer:
             self.dump_file.write("\n" if self.decode else b"\n")
 
 
-# consider use https://toolbelt.readthedocs.io/en/latest/dumputils.html instead
-request_template = """{} {} HTTP/1.1
+request_template_get = """{} {} HTTP/1.1
 {}
 
 {}"""
+
+request_template_post = """{} {} HTTP/1.1
+{}
+"""
 
 response_template = """HTTP/1.1 {} {}
 {}
@@ -89,11 +92,11 @@ def pretty_request(req):
 
     headers = {"Host": urlparse(req.url).netloc}
     headers.update(req.headers)
-    return request_template.format(
+    return (request_template_get if req.method == 'GET' else request_template_post).format(
         req.method,
         urlparse(req.url).path,
         "\n".join("{}: {}".format(k, v) for k, v in headers.items()),
-        req.body,
+        req.body or '',
     )
 
 
