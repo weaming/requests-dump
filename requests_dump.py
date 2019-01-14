@@ -10,6 +10,7 @@ from io import BytesIO
 
 # requests use urllib3 to do http request
 from urllib3.packages.six.moves.http_client import HTTPConnection
+import requests
 
 version = "0.1"
 
@@ -72,4 +73,41 @@ class Capturer:
 
     def finish(self):
         if self.dump:
-            self.dump_file.write('\n' if self.decode else b'\n')
+            self.dump_file.write("\n" if self.decode else b"\n")
+
+
+# consider use https://toolbelt.readthedocs.io/en/latest/dumputils.html instead
+request_template = """{} {} HTTP/1.1
+{}
+
+{}"""
+
+response_template = """HTTP/1.1 {} {}
+{}
+
+{}"""
+
+
+def pretty_request(req):
+    from urllib.parse import urlparse
+
+    if isinstance(req, requests.Request):
+        req = req.prepare()
+
+    headers = {"Host": urlparse(req.url).netloc}
+    headers.update(req.headers)
+    return request_template.format(
+        req.method,
+        urlparse(req.url).path,
+        "\n".join("{}: {}".format(k, v) for k, v in headers.items()),
+        req.body,
+    )
+
+
+def pretty_response(res):
+    return response_template.format(
+        res.status_code,
+        res.reason,
+        "\n".join("{}: {}".format(k, v) for k, v in res.headers.items()),
+        res.text,
+    )
