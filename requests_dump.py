@@ -39,37 +39,30 @@ class Capturer:
         self.dump_file = dump_file
         self.decode = decode
 
-        self.reqbuffer = BytesIO()
-        self.resbuffer = BytesIO()
-
+        self.buffer = BytesIO()
         self.capture_requests()
 
     def send(self, *args, **kwargs):
-        self.write_req(args[1])
-
-    def read(self, rv):
-        self.write_res(rv)
+        """wapper to satisfy insert_middlewares()"""
+        self.write(args[1])
 
     def try_dump(self, data: bytes):
         if self.dump:
             self.dump_file.write(data.decode() if self.decode else data)
 
-    def write_req(self, data: bytes):
-        self.reqbuffer.write(data)
+    def write(self, data: bytes):
+        self.buffer.write(data)
         self.try_dump(data)
 
-    def write_res(self, data: bytes):
-        self.resbuffer.write(data)
-        self.try_dump(data)
-
-    def getall_req(self):
-        return self.reqbuffer.getvalue()
-
-    def getall_res(self):
-        return self.resbuffer.getvalue()
+    def getall(self):
+        return self.buffer.getvalue()
 
     def capture_requests(self):
+        self.origin_send = HTTPConnection.send
         HTTPConnection.send = insert_middlewares([self.send])(HTTPConnection.send)
+
+    def unpatch(self):
+        HTTPConnection.send = self.origin_send
 
     def finish(self):
         if self.dump:

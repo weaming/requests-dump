@@ -30,8 +30,8 @@ install_requires = [
     if l.strip() and not l.strip().startswith("#")
 ]
 
-name = "requests-dump"
-gh_repo = "https://github.com/weaming/{}".format(name)
+name = "requests-dump2"
+gh_repo = "https://github.com/weaming/requests-dump"
 
 setup(
     name=name,  # Required

@@ -1,7 +1,7 @@
 from requests_dump import Capturer
 import requests
 
-# 1.
+# 1. init and patch HTTPConnection.send
 capturer = Capturer()
 
 # Or
@@ -15,4 +15,7 @@ response = requests.post("https://www.baidu.com", {"hi": "test"})
 capturer.finish()  # write extra \n
 
 # 3.
-print(capturer.getall_req().decode())
+print(capturer.getall().decode())
+
+# 4.
+capturer.unpatch()
