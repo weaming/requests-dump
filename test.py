@@ -12,7 +12,7 @@ capturer = Capturer()
 
 # 2.
 response = requests.post("https://www.baidu.com", {"hi": "test"})
-capturer.finish()  # write extra \n
+capturer.finish()  # write extra \n to dump_file after finish one request
 
 # 3.
 print(capturer.getall().decode())
